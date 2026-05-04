@@ -89,7 +89,13 @@ function FloralAccent({ className }: { className?: string }) {
 }
 
 // ── Main component ──────────────────────────────────────────────────────────
-export default function InvitationScene({ invitation }: { invitation: Invitation }) {
+export default function InvitationScene({
+  invitation,
+  audioRef,
+}: {
+  invitation: Invitation;
+  audioRef?: React.RefObject<HTMLAudioElement | null>;
+}) {
   return (
     <>
       {/* Global reveal animation styles */}
@@ -361,7 +367,7 @@ export default function InvitationScene({ invitation }: { invitation: Invitation
         </section>
 
         {/* Floating music player */}
-        <MusicPlayer />
+        <MusicPlayer audioRef={audioRef} />
       </div>
     </>
   );

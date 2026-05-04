@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import InvitationScene from "./InvitationScene";
 
 type Invitation = {
@@ -22,10 +22,19 @@ export default function EnvelopeOpener({
   const [started, setStarted] = useState(false);
   const [done, setDone] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    audioRef.current = new Audio("/anichmenk10.mp3");
+    audioRef.current.loop = true;
+    audioRef.current.volume = 0.4;
+    return () => { audioRef.current?.pause(); };
+  }, []);
 
   const handleTapToStart = () => {
     setStarted(true);
     videoRef.current?.play();
+    audioRef.current?.play().catch(() => {});
   };
 
   const handleEnd = () => setDone(true);
@@ -99,7 +108,7 @@ export default function EnvelopeOpener({
         className="transition-opacity duration-700"
         style={{ opacity: done ? 1 : 0, pointerEvents: done ? "auto" : "none" }}
       >
-        <InvitationScene invitation={invitation} />
+        <InvitationScene invitation={invitation} audioRef={audioRef} />
       </div>
     </div>
   );

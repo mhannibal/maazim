@@ -4,26 +4,35 @@ import { useRef, useState, useEffect } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
-export default function MusicPlayer() {
+export default function MusicPlayer({
+  audioRef: externalAudioRef,
+}: {
+  audioRef?: React.RefObject<HTMLAudioElement | null>;
+}) {
   const [playing, setPlaying] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const internalAudioRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef = externalAudioRef ?? internalAudioRef;
   const barsRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const barAnimations = useRef<gsap.core.Tween[]>([]);
 
-  // A royalty-free ambient piece from pixabay (public CDN)
-  const MUSIC_URL =
-    "https://cdn.pixabay.com/audio/2022/10/25/audio_946b47251b.mp3";
-
   useEffect(() => {
-    audioRef.current = new Audio(MUSIC_URL);
-    audioRef.current.loop = true;
-    audioRef.current.volume = 0.4;
-    return () => {
-      audioRef.current?.pause();
-    };
+    // Only create a new Audio instance if no external one was provided
+    if (!externalAudioRef) {
+      internalAudioRef.current = new Audio("/anichmenk10.mp3");
+      internalAudioRef.current.loop = true;
+      internalAudioRef.current.volume = 0.4;
+    }
+    return () => { internalAudioRef.current?.pause(); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Sync playing state with the external audio (already started on tap)
+  useEffect(() => {
+    if (externalAudioRef?.current) {
+      setPlaying(true);
+    }
+  }, [externalAudioRef]);
 
   // Animate sound-wave bars when playing
   useGSAP(
@@ -57,8 +66,6 @@ export default function MusicPlayer() {
 
   const toggle = async () => {
     if (!audioRef.current) return;
-
-    if (!hasInteracted) setHasInteracted(true);
 
     if (playing) {
       audioRef.current.pause();
