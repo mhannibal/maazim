@@ -2,16 +2,27 @@
 
 import { useRef, useState, useEffect } from "react";
 import InvitationScene from "./InvitationScene";
+import { getTemplate } from "@/lib/templates";
+import { getTrack } from "@/lib/music";
+import type { Blocks } from "@/lib/blocks";
 
 type Invitation = {
+  id: string;
   slug: string;
+  themeId: string;
+  musicId: string;
+  blocks: Blocks;
   couple: { partner1: string; partner2: string };
-  date: { display: string; short: string };
+  date: { display: string; short: string; iso: string };
   ceremony: { time: string; venue: string; address: string };
   reception: { time: string; venue: string; address: string };
   story: string;
   dressCode: string;
   rsvpDeadline: string;
+  programmeContent: string;
+  menuContent: string;
+  giftsContent: string;
+  accommodationContent: string;
 };
 
 export default function EnvelopeOpener({
@@ -24,12 +35,15 @@ export default function EnvelopeOpener({
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  const template = getTemplate(invitation.themeId);
+  const track = getTrack(invitation.musicId);
+
   useEffect(() => {
-    audioRef.current = new Audio("/anichmenk10.mp3");
+    audioRef.current = new Audio(track.src);
     audioRef.current.loop = true;
     audioRef.current.volume = 0.4;
     return () => { audioRef.current?.pause(); };
-  }, []);
+  }, [track.src]);
 
   const handleTapToStart = () => {
     setStarted(true);
@@ -45,13 +59,14 @@ export default function EnvelopeOpener({
   };
 
   return (
-    <div className="relative bg-[#0a0704]">
+    <div className="relative bg-[#0a0704] min-h-screen">
       {/* ── Full-screen video intro ── */}
       {!done && (
-        <div className="fixed inset-0 z-50 bg-black">
+        <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
+          <div className="relative w-full max-w-[430px] h-full">
           <video
             ref={videoRef}
-            src="/letterinvit1.mp4"
+            src={template.video}
             playsInline
             muted
             onEnded={handleEnd}
@@ -100,6 +115,7 @@ export default function EnvelopeOpener({
               </svg>
             </button>
           )}
+          </div>
         </div>
       )}
 

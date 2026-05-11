@@ -2,15 +2,24 @@
 
 import { useEffect, useRef } from "react";
 import MusicPlayer from "./MusicPlayer";
+import RsvpForm from "./RsvpForm";
+import Countdown from "./Countdown";
+import type { Blocks } from "@/lib/blocks";
 
 type Invitation = {
+  id: string;
   couple: { partner1: string; partner2: string };
-  date: { display: string; short: string };
+  date: { display: string; short: string; iso: string };
   ceremony: { time: string; venue: string; address: string };
   reception: { time: string; venue: string; address: string };
   story: string;
   dressCode: string;
   rsvpDeadline: string;
+  blocks: Blocks;
+  programmeContent: string;
+  menuContent: string;
+  giftsContent: string;
+  accommodationContent: string;
 };
 
 // ── Scroll-reveal hook ──────────────────────────────────────────────────────
@@ -112,7 +121,7 @@ export default function InvitationScene({
       `}</style>
 
       <div
-        className="relative overflow-x-hidden"
+        className="relative overflow-x-hidden mx-auto w-full max-w-[430px]"
         style={{ fontFamily: "var(--font-cormorant)" }}
       >
 
@@ -163,9 +172,15 @@ export default function InvitationScene({
               Request the honour of your presence
             </p>
 
-            <p className="mt-3 text-[#2D1B0E]/55 text-sm tracking-wider">
-              {invitation.date.display}
-            </p>
+            {invitation.blocks.date && (
+              <p className="mt-3 text-[#2D1B0E]/55 text-sm tracking-wider">
+                {invitation.date.display}
+              </p>
+            )}
+
+            {invitation.blocks.countdown && (
+              <Countdown targetIso={invitation.date.iso} />
+            )}
           </div>
 
           <FloralAccent className="absolute bottom-14 left-1/2 -translate-x-1/2 w-36 sm:w-48 opacity-60" />
@@ -207,8 +222,9 @@ export default function InvitationScene({
         </section>
 
         {/* ══════════════════════════════════════════
-            SECTION 3 — EVENT DETAILS
+            SECTION 3 — LIEU
         ══════════════════════════════════════════ */}
+        {invitation.blocks.lieu && (
         <section className="relative py-20 px-5 bg-[#FAF7F2]">
           <div className="max-w-2xl mx-auto text-center">
             <Reveal>
@@ -281,10 +297,109 @@ export default function InvitationScene({
             </div>
           </div>
         </section>
+        )}
+
+        {/* ══════════════════════════════════════════
+            SECTION — PROGRAMME
+        ══════════════════════════════════════════ */}
+        {invitation.blocks.programme && invitation.programmeContent && (
+          <section className="relative py-16 px-5 bg-white text-center">
+            <Reveal className="max-w-sm mx-auto">
+              <GoldDivider />
+              <p className="text-[#C9A96E] text-[10px] tracking-[0.4em] uppercase mb-6">
+                Programme
+              </p>
+              <div className="text-left space-y-3">
+                {invitation.programmeContent.split('\n').map((line, i) => {
+                  const [time, ...rest] = line.split('—')
+                  return (
+                    <div key={i} className="flex items-start gap-3">
+                      {rest.length > 0 ? (
+                        <>
+                          <span className="shrink-0 text-[#C9A96E] text-xs font-medium tracking-wider pt-0.5 min-w-[3.5rem]"
+                            style={{ fontFamily: 'var(--font-playfair)' }}>
+                            {time.trim()}
+                          </span>
+                          <span className="text-[#2D1B0E]/70 text-sm leading-relaxed">
+                            — {rest.join('—').trim()}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-[#2D1B0E]/70 text-sm leading-relaxed">{line}</span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+              <GoldDivider />
+            </Reveal>
+          </section>
+        )}
+
+        {/* ══════════════════════════════════════════
+            SECTION — MENU
+        ══════════════════════════════════════════ */}
+        {invitation.blocks.menu && invitation.menuContent && (
+          <section className="relative py-16 px-5 bg-[#FAF7F2] text-center">
+            <Reveal className="max-w-sm mx-auto">
+              <GoldDivider />
+              <p className="text-[#C9A96E] text-[10px] tracking-[0.4em] uppercase mb-6">
+                Menu
+              </p>
+              <div className="text-left space-y-2">
+                {invitation.menuContent.split('\n').map((line, i) => (
+                  <p key={i} className="text-[#2D1B0E]/70 text-sm leading-relaxed">{line}</p>
+                ))}
+              </div>
+              <GoldDivider />
+            </Reveal>
+          </section>
+        )}
+
+        {/* ══════════════════════════════════════════
+            SECTION — LISTE DE CADEAUX
+        ══════════════════════════════════════════ */}
+        {invitation.blocks.cadeaux && invitation.giftsContent && (
+          <section className="relative py-16 px-5 bg-white text-center">
+            <Reveal className="max-w-sm mx-auto">
+              <GoldDivider />
+              <p className="text-[#C9A96E] text-[10px] tracking-[0.4em] uppercase mb-5">
+                Liste de cadeaux
+              </p>
+              <div className="text-left space-y-2">
+                {invitation.giftsContent.split('\n').map((line, i) => (
+                  <p key={i} className="text-[#2D1B0E]/70 text-sm leading-relaxed">{line}</p>
+                ))}
+              </div>
+              <GoldDivider />
+            </Reveal>
+          </section>
+        )}
+
+        {/* ══════════════════════════════════════════
+            SECTION — HÉBERGEMENT
+        ══════════════════════════════════════════ */}
+        {invitation.blocks.hebergement && invitation.accommodationContent && (
+          <section className="relative py-16 px-5 bg-[#FAF7F2] text-center">
+            <Reveal className="max-w-sm mx-auto">
+              <GoldDivider />
+              <p className="text-[#C9A96E] text-[10px] tracking-[0.4em] uppercase mb-5">
+                Hébergement
+              </p>
+              <div className="text-left space-y-2">
+                {invitation.accommodationContent.split('\n').map((line, i) => (
+                  <p key={i} className="text-[#2D1B0E]/70 text-sm leading-relaxed">{line}</p>
+                ))}
+              </div>
+              <GoldDivider />
+            </Reveal>
+          </section>
+        )}
 
         {/* ══════════════════════════════════════════
             SECTION 4 — DRESS CODE
         ══════════════════════════════════════════ */}
+        {invitation.blocks.dress_code && (
         <section className="py-16 px-5 bg-[#F5EFE4] text-center">
           <Reveal className="max-w-xs mx-auto">
             <GoldDivider />
@@ -303,10 +418,12 @@ export default function InvitationScene({
             <GoldDivider />
           </Reveal>
         </section>
+        )}
 
         {/* ══════════════════════════════════════════
             SECTION 5 — RSVP
         ══════════════════════════════════════════ */}
+        {invitation.blocks.rsvp && (
         <section className="relative py-24 px-5 bg-[#2D1B0E] text-center overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_40%,_rgba(201,169,110,0.07)_0%,_transparent_80%)]" />
           <FloralAccent className="absolute top-6 left-1/2 -translate-x-1/2 w-44 rotate-180 opacity-40" />
@@ -330,20 +447,11 @@ export default function InvitationScene({
             </p>
 
             {/* Full-width buttons on mobile, inline on sm+ */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
-              <button
-                className="w-full sm:w-auto px-8 py-3.5 border border-[#C9A96E] text-[#C9A96E] text-xs tracking-[0.2em] uppercase hover:bg-[#C9A96E] hover:text-[#2D1B0E] active:scale-95 transition-all duration-300 rounded-sm"
-                style={{ fontFamily: "var(--font-cormorant)" }}
-              >
-                Joyfully Accept
-              </button>
-              <button
-                className="w-full sm:w-auto px-8 py-3.5 border border-[#FAF7F2]/20 text-[#FAF7F2]/45 text-xs tracking-[0.2em] uppercase hover:border-[#FAF7F2]/50 hover:text-[#FAF7F2]/75 active:scale-95 transition-all duration-300 rounded-sm"
-                style={{ fontFamily: "var(--font-cormorant)" }}
-              >
-                Regretfully Decline
-              </button>
-            </div>
+            <RsvpForm
+              invitationId={invitation.id}
+              coupleName={`${invitation.couple.partner1} & ${invitation.couple.partner2}`}
+              rsvpDeadline={invitation.rsvpDeadline}
+            />
           </Reveal>
 
           <FloralAccent className="absolute bottom-6 left-1/2 -translate-x-1/2 w-44 opacity-40" />
@@ -365,6 +473,7 @@ export default function InvitationScene({
             </p>
           </div>
         </section>
+        )}
 
         {/* Floating music player */}
         <MusicPlayer audioRef={audioRef} />
